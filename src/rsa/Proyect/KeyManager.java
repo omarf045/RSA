@@ -1,23 +1,17 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package rsa.Proyect;
 
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
 import javax.crypto.KeyGenerator;
 
-/**
- *
- * @author Omar Pulido
- */
+
 public class KeyManager {
 
     public KeyManager() {
     }
 
+    //  Generacion de la clave secreta usando el algoritmo AES longitud 128
+    
     public SecretKey generateSecretKey() throws NoSuchAlgorithmException {
 
         SecretKey key;

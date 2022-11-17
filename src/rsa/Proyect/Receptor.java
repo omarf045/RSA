@@ -26,41 +26,45 @@ public class Receptor {
         Comunication comunicator = new Comunication();
         Encryptor cryptor = new Encryptor();
 
-        //  Autoridad
+        //  Se conecta a la autoridad certificadora
         System.out.println(" ¬ Ingresa la IP de la autoridad certificadora: ");
         InetAddress ipC = InetAddress.getByName(scanner.nextLine());
 
-        //  Clave Privada Receptor
+        //  Se recibe la clave privada del receptor
         Socket socketPrivateKeyReceptor = new Socket(ipC, AUTH_PORT);
         PrivateKey privateKeyReceptor = encoder.privateKey(socketPrivateKeyReceptor);
 
-        //  Clave Publica Emisor
+        //  Se recibe la clave publica del emisor
         Socket socketPublicKeyEmisor = new Socket(ipC, AUTH_PORT);
         PublicKey publicKeyEmisor = encoder.publicKey(socketPublicKeyEmisor);
 
         System.out.println(" └ Claves recibidas");
 
-        //  Emisor
+        //  Se conecta al emisor
         System.out.println(" ¬ Ingresa la IP del emisor: ");
         InetAddress ipE = InetAddress.getByName(scanner.nextLine());
 
-        // Recibir clave secreta cifrada
+        // Se recibe clave secreta cifrada
         byte[] cipheredSecretKey = comunicator.getBytes(ipE, CLIENT_SERVER_PORT);
 
         System.out.println(" └ Clave secreta recibida");
 
-        //  Descifrar clave secreta
+        //  Se descifra clave secreta con la clave privada del receptor
         byte[] encodedSecretKey = cryptor.RSADecryption(privateKeyReceptor, cipheredSecretKey);
         SecretKey secretKey = new SecretKeySpec(encodedSecretKey, 0, encodedSecretKey.length, "AES");
 
+        //  Se instancia la clase cliente
         Client client = new Client(ipE, CLIENT_SERVER_PORT);
 
+        //  Setteo de las claves a utilizar
         client.setPrivateKey(privateKeyReceptor);
         client.setPublicKey(publicKeyEmisor);
         client.setSecretKey(secretKey);
 
+        //  Se inicia la conexion
         client.start();
 
+        //  Esperamos a que la conexion este lists
         while (client.isReady == false) {
             System.out.println("Esperando conexion...");
             Thread.sleep(1000);
@@ -68,12 +72,14 @@ public class Receptor {
 
         String msg = "";
 
+        //  Ciclo para mandar mensajes
         while (!msg.contains("exit()")) {
             System.out.print(">>> ");
             msg = "Receptor: " + scanner.nextLine();
             client.sendData(msg);
         }
 
+        //  Se cierra la conexion
         client.closeConnection();
     }
 

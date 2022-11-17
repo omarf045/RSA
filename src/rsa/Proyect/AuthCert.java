@@ -10,36 +10,39 @@ public class AuthCert {
 
         int PORT = 5000;
 
-        // Llaves Emisor
+        // Generacion de llaves del emisor
         Generator emisorKeys = new Generator();
 
-        //Llaves Receptor
+        // Generacion de llaves del receptor
         Generator receptorKeys = new Generator();
 
         try {
             KeyDelivery kd = new KeyDelivery();
 
-            //Emisor
+            //  Se espera la conexion del emisor
             ServerSocket ssEmisorPriv = new ServerSocket(PORT);
-            System.out.println("Esperanding al Emisor...");
+            System.out.println("Esperando al emisor...");
 
+            //  Se manda la clave privada del emisor al emisor
             kd.sendPrivateKey(emisorKeys.getPrivateKey(), ssEmisorPriv);
 
+            //  Se manda la clave publica del receptor al emisor
             ServerSocket ssReceptorPubl = new ServerSocket(PORT);
 
             kd.sendPublicKey(receptorKeys.getPublicKey(), ssReceptorPubl);
-            System.out.println("Claves Enviadas al Emisor");
+            System.out.println("Claves enviadas al emisor");
 
-            //Receptor
+            //  Se manda la clave privada del receptor al receptor
             ServerSocket ssReceptorPriv = new ServerSocket(PORT);
-            System.out.println("Esperanding al Receptor...");
+            System.out.println("Esperando al receptor...");
 
             kd.sendPrivateKey(receptorKeys.getPrivateKey(), ssReceptorPriv);
 
+            //  Se manda la clave publica del emisor al receptor
             ServerSocket ssEmisorPubl = new ServerSocket(PORT);
 
             kd.sendPublicKey(emisorKeys.getPublicKey(), ssEmisorPubl);
-            System.out.println("Claves Enviadas al Receptor");
+            System.out.println("Claves enviadas al receptor");
 
         } catch (IOException ex) {
             System.out.println(ex);

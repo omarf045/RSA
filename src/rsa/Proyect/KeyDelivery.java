@@ -12,6 +12,7 @@ public class KeyDelivery {
     public KeyDelivery() {
     }
 
+    //  Envio con sockets de las claves
     public void sendPrivateKey(PrivateKey privateKey, ServerSocket servSock) {
         try {
             Socket sock = servSock.accept();

@@ -13,6 +13,7 @@ public class Generator {
 
     public Generator() {
         try {
+            //  Se genera un par de claves usando el algoritmo RSA de longitud 1024
             KeyPairGenerator keyGenEmisor = KeyPairGenerator.getInstance("RSA");
             keyGenEmisor.initialize(1024);
             KeyPair pairEmisor = keyGenEmisor.generateKeyPair();

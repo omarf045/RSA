@@ -26,66 +26,62 @@ public class Emisor {
             Encryptor cryptor = new Encryptor();
             Comunication comunicator = new Comunication();
 
-            //  Autoridad
+            //  Se conecta a la autoridad certificadora
             System.out.println(" ¬ Ingresa la IP de la autoridad certificadora: ");
             InetAddress ipC = InetAddress.getByName(scanner.nextLine());
 
-            //  Clave Privada Emisor
+            //  Se recibe la clave privada del emisor
             Socket socketPrivateKeyEmisor = new Socket(ipC, AUTH_PORT);
             PrivateKey privateKeyEmisor = encoder.privateKey(socketPrivateKeyEmisor);
 
-            //  Clave Publica Receptor
+            //  Se recibe la clave publica del receptor
             Socket socketPublicKeyReceptor = new Socket(ipC, AUTH_PORT);
             PublicKey publicKeyReceptor = encoder.publicKey(socketPublicKeyReceptor);
 
             System.out.println(" └ Claves recibidas");
 
-            /*System.out.println(" ¬ Escriba su mensaje: ");
-            String msj = scanner.nextLine();*/
-            //  Generacion de clave secreta
+            //  Se genera de clave secreta
             SecretKey secretKey = new KeyManager().generateSecretKey();
 
             //  Cifrado de la clave secreta
             byte[] rawSecretKey = secretKey.getEncoded();
             byte[] cipheredSecretKey = cryptor.RSAEncryption(publicKeyReceptor, rawSecretKey);
 
-            //  Envio de la clave secreta cifrada
+            //  Se envia la clave secreta cifrada
             comunicator.sendBytes(CLIENT_SERVER_PORT, cipheredSecretKey);
 
             System.out.println(" └ Clave secreta enviada");
 
+            //  Se instancia la clase Server
             Server server = new Server(CLIENT_SERVER_PORT);
 
+            // Setteo de las claves a utilizar
             server.setPrivateKey(privateKeyEmisor);
             server.setPublicKey(publicKeyReceptor);
             server.setSecretKey(secretKey);
 
+            //  Se inicia la conexion
             server.start();
 
+            //  Espera a que la conexion este lista
             while (server.isReady == false) {
                 System.out.println("Esperando conexion...");
                 Thread.sleep(1000);
             }
 
             String msg = "";
-
+            
+            //  Ciclo para mandar los mensajes
             while (!msg.contains("exit()")) {
                 System.out.print(">>> ");
                 msg = "Emisor: " + scanner.nextLine();
                 server.sendData(msg);
             }
 
+            //  Se cierra la conexion
             server.closeConnection();
 
         } catch (IOException | InvalidKeyException | NoSuchAlgorithmException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException ex) {
         }
-    }
-
-    public static byte[] joinByteArray(byte[] byte1, byte[] byte2, byte[] byte3) {
-        return ByteBuffer.allocate(byte1.length + byte2.length + byte3.length)
-                .put(byte1)
-                .put(byte2)
-                .put(byte3)
-                .array();
     }
 }

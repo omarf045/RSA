@@ -15,8 +15,10 @@ public class Encoder {
 
     public Encoder() {}
     
+    // Se obtienen las claves en bytes y se encodean a sus tipos PrivateKey y PublicKey
+    
     public PublicKey publicKey(Socket socketPublicK) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-
+        
         byte[] lenb = new byte[4];
         socketPublicK.getInputStream().read(lenb, 0, 4);
         ByteBuffer bb = ByteBuffer.wrap(lenb);
@@ -25,10 +27,10 @@ public class Encoder {
         socketPublicK.getInputStream().read(publicKeyBytes);
         X509EncodedKeySpec ks = new X509EncodedKeySpec(publicKeyBytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");
-        PublicKey publicReceptorKey = kf.generatePublic(ks);
+        PublicKey publicKey = kf.generatePublic(ks);
         socketPublicK.close();
 
-        return publicReceptorKey;
+        return publicKey;
     }
 
     public PrivateKey privateKey(Socket socketPrivateK) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {

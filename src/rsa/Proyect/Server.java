@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package rsa.Proyect;
 
 import java.io.EOFException;
@@ -21,10 +16,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
-/**
- *
- * @author User
- */
 public class Server extends Thread {
 
     ServerSocket socket;
@@ -46,8 +37,11 @@ public class Server extends Thread {
 
     public void startServer() throws IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
         try {
+            //  Se espera a la conexion del cliente
             waitConnection(port);
+            //  Obtiene los flujos
             getFlows();
+            //  Inicia el procesamiento de los datos recibidos
             processConnection();
         } catch (EOFException ex) {
             System.err.println(ex);
@@ -71,34 +65,43 @@ public class Server extends Thread {
 
         String cipheredData, cipheredMessage, cipheredAddendum;
 
+        // Indica que la conexion esta lista
         isReady = true;
         do {
             try {
+                //  Recibe los datos cifrados
                 cipheredData = (String) input.readObject();
 
+                // Divide los datos cifrados en el addendum cifrado y el mensaje cifrado
                 cipheredAddendum = cipheredData.substring(0, 256);
                 cipheredMessage = cipheredData.substring(256);
 
+                // Convierte los datos de String (hexadecimal) a binario
                 byte[] bytesAddendum = hexToBytes(cipheredAddendum);
                 byte[] bytesMessage = hexToBytes(cipheredMessage);
 
+                //  Descifra el mensaje con la clave secreta
                 byte[] encodedMsj = cryptor.AESDecryption(secretKey, bytesMessage);
                 message = new String(encodedMsj, StandardCharsets.UTF_8);
 
-                //  Descifrar addendum
+                //  Descifrar addendum con la clave publica de quien mando el mensaje
                 byte[] encodedAddendum = cryptor.RSADecryption(publicKey, bytesAddendum);
                 String addendum = new String(encodedAddendum, StandardCharsets.UTF_8);
 
+                //  Generar addendum del mensaje descifrado
                 String msjAddendum = new Addendum().generateHash(message);
+
+                //Comparar addendums
                 if (addendum.equals(msjAddendum)) {
+                    //  Si el mensaje es "exit()" cierra la conexion
                     if (message.contains("exit()")) {
                         System.exit(0);
                     } else {
+                        //  Imprime el mensaje
                         System.out.println(message);
                         System.out.print(">> ");
                     }
                 }
-
             } catch (ClassNotFoundException ex) {
             }
         } while (!message.contains("exit()"));
@@ -114,12 +117,14 @@ public class Server extends Thread {
             byte[] cipheredMsg = cryptor.AESEncryption(secretKey, data);
             byte[] cipheredAddendum = cryptor.RSAEncryption(privateKey, addendum.getBytes());
 
-            // Convertir los bytes a String
+            //  Convierte los bytes a String en hexadecimal
             String hexMsg = bytesToHex(cipheredMsg);
             String hexAddendum = bytesToHex(cipheredAddendum);
 
+            //  Concatena el addendum cifrado con el mensaje cifrado
             String cipheredData = hexAddendum + hexMsg;
 
+            //  Manda los datos
             output.writeObject(cipheredData);
             output.flush();
         } catch (IOException ex) {
@@ -128,6 +133,7 @@ public class Server extends Thread {
 
     public void closeConnection() {
         try {
+            //  Cierra el socket y los objectStreams
             output.close();
             input.close();
             connection.close();
@@ -135,10 +141,12 @@ public class Server extends Thread {
         }
     }
 
+    //  Flag para saber si esta lista la conexion
     public boolean isReady() {
         return isReady;
     }
 
+    //  Metodo para iniciar en segundo plano el servidor
     @Override
     public void run() {
         try {
@@ -147,6 +155,7 @@ public class Server extends Thread {
         }
     }
 
+    //  Setters de las claves a utilizar
     public void setPublicKey(PublicKey publicKey) {
         this.publicKey = publicKey;
     }
@@ -159,6 +168,7 @@ public class Server extends Thread {
         this.secretKey = secretKey;
     }
 
+    // Convertir de String (hexadecimal) a bytes
     public static byte[] hexToBytes(String s) {
         int len = s.length();
         byte[] data = new byte[len / 2];
@@ -168,6 +178,7 @@ public class Server extends Thread {
         return data;
     }
 
+    // Convertir de bytes a String (hexadecimal)
     public static String bytesToHex(byte[] bytes) {
         StringBuilder result = new StringBuilder();
         for (byte temp : bytes) {
@@ -175,4 +186,5 @@ public class Server extends Thread {
         }
         return result.toString();
     }
+
 }

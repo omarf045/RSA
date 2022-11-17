@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package rsa.Proyect;
 
 import java.io.UnsupportedEncodingException;
@@ -15,10 +10,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
-/**
- *
- * @author Omar Pulido
- */
 public class Encryptor {
 
     public Encryptor() {
@@ -50,8 +41,7 @@ public class Encryptor {
 
         return cipherBytes;
     }
-    
-    
+
     public byte[] AESDecryption(SecretKey key, byte[] msj) throws IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, UnsupportedEncodingException {
 
         Cipher cipher = Cipher.getInstance("AES");
